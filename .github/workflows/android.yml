@@ -1,0 +1,38 @@
+name: Android APK Derleyici
+
+on:
+  push:
+    branches: [ "main", "master" ] # Kod yüklendiğinde otomatik başla
+  workflow_dispatch: # Manuel olarak da başlatabilirsin
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # GitHub'ın Linux sunucusunda çalışır
+
+    steps:
+      # 1. GitHub'daki kodlarını sunucuya indirir
+      - name: Kodu Çek (Checkout)
+        uses: actions/checkout@v4
+
+      # 2. Android derlemek için gerekli olan Java'yı kurar
+      - name: Java JDK 17 Kur
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. Gradle (derleme sistemi) izinlerini ayarlar
+      - name: Gradle Yetkisi Ver
+        run: chmod +x gradlew
+
+      # 4. APK'yı oluşturur (Debug modunda)
+      - name: APK Oluştur (Build)
+        run: ./gradlew assembleDebug
+
+      # 5. Oluşan APK'yı GitHub ekranına "indirilebilir" olarak yükler
+      - name: APK'yı Sisteme Yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: sistem-uygulamasi-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
